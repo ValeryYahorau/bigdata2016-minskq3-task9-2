@@ -3,8 +3,8 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.epam.bigdata</groupId>
     <artifactId>bigdata2016-minskq3-task9-2</artifactId>
-    <name>bigdata2016-minskq3-task9-2</name>
     <version>1.0</version>
+    <name>bigdata2016-minskq3-task9-2</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -62,7 +62,7 @@
                 </executions>
                 <configuration>
                     <descriptorRefs>
-                        <descriptorRef>with-dep</descriptorRef>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
                 </configuration>
             </plugin>
