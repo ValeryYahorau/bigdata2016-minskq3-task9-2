@@ -1,4 +1,4 @@
-package com.epam.bigdata2016.minskq3.task8;
+package com.epam.bigdata2016.minskq3.task9;
 
 import java.util.Arrays;
 import java.util.Iterator;
