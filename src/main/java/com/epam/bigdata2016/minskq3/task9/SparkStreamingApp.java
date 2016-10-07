@@ -66,21 +66,21 @@ public class SparkStreamingApp {
                 return Arrays.asList(SPACE.split(x)).iterator();
             }
         });
-//
-//        JavaPairDStream<String, Integer> wordCounts = words.mapToPair(
-//                new PairFunction<String, String, Integer>() {
-//                    @Override
-//                    public Tuple2<String, Integer> call(String s) {
-//                        return new Tuple2<>(s, 1);
-//                    }
-//                }).reduceByKey(new Function2<Integer, Integer, Integer>() {
-//            @Override
-//            public Integer call(Integer i1, Integer i2) {
-//                return i1 + i2;
-//            }
-//        });
-//
-//        wordCounts.print();
+
+        JavaPairDStream<String, Integer> wordCounts = words.mapToPair(
+                new PairFunction<String, String, Integer>() {
+                    @Override
+                    public Tuple2<String, Integer> call(String s) {
+                        return new Tuple2<>(s, 1);
+                    }
+                }).reduceByKey(new Function2<Integer, Integer, Integer>() {
+            @Override
+            public Integer call(Integer i1, Integer i2) {
+                return i1 + i2;
+            }
+        });
+
+        wordCounts.print();
         jssc.start();
         jssc.awaitTermination();
     }
