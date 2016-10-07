@@ -55,7 +55,7 @@ public class SparkStreamingApp {
             @Override
             public String call(Tuple2<String, String> tuple2) {
 
-                System.out.println("###1 " + tuple2._1().toString() + " " + tuple2._2().toString());
+                System.out.println("###1 " + tuple2.toString());
                 return tuple2._2();
             }
         });
