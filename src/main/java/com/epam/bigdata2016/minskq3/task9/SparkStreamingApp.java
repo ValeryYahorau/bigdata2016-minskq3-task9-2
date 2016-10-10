@@ -63,25 +63,31 @@ public class SparkStreamingApp {
         JavaPairReceiverInputDStream<String, String> messages =
                 KafkaUtils.createStream(jssc, zkQuorum, group, topicMap);
 
+        System.out.println("$1");
 
-        Configuration conf = HBaseConfiguration.create();
-        conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"));
-        conf.set("hbase.zookeeper.property.clientPort", "2181");
-        conf.set("hbase.zookeeper.quorum", "sandbox.hortonworks.com");
-        conf.set("zookeeper.znode.parent", "/hbase");
 
-        HTableDescriptor crTable = new HTableDescriptor(Bytes.toBytes("loglines"));
-        HColumnDescriptor family = new HColumnDescriptor(Bytes.toBytes("logline"));
-        crTable.addFamily(family);
 
-        HBaseAdmin admin = new HBaseAdmin(conf);
-        admin.createTable(crTable);
+
+//        HTableDescriptor crTable = new HTableDescriptor(Bytes.toBytes("loglines"));
+ //       HColumnDescriptor family = new HColumnDescriptor(Bytes.toBytes("logline"));
+ //       crTable.addFamily(family);
+
+//        HBaseAdmin admin = new HBaseAdmin(conf);
+//        admin.createTable(crTable);
 
         JavaDStream<LogEntity> lines = messages.map(new Function<Tuple2<String, String>, LogEntity>() {
             @Override
             public LogEntity call(Tuple2<String, String> tuple2) {
 
                 System.out.println("%1");
+
+                Configuration conf = HBaseConfiguration.create();
+                //conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"));
+                conf.set("hbase.zookeeper.property.clientPort", "2181");
+                conf.set("hbase.zookeeper.quorum", "sandbox.hortonworks.com");
+                conf.set("zookeeper.znode.parent", "/hbase");
+
+
                 Put put = new Put(Bytes.toBytes(new java.util.Date().getTime()));
                 put.add(Bytes.toBytes("details"), Bytes.toBytes("logline"), Bytes.toBytes(tuple2._2()));
                 try {
