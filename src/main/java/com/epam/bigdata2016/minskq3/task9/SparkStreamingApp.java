@@ -64,7 +64,7 @@ public class SparkStreamingApp {
         conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"));
         conf.set("hbase.zookeeper.property.clientPort", "2181");
         conf.set("hbase.zookeeper.quorum", "sandbox.hortonworks.com");
-        conf.set("zookeeper.znode.parent", "/hbase");
+        conf.set("zookeeper.znode.parent", "/hbase-unsecure");
         HTable table = new HTable(conf, "loglines");
 
         JavaDStream<LogEntity> lines = messages.map(new Function<Tuple2<String, String>, LogEntity>() {
