@@ -1,6 +1,5 @@
 package com.epam.bigdata2016.minskq3.task9;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
@@ -9,17 +8,12 @@ import java.util.regex.Pattern;
 
 import com.epam.bigdata2016.minskq3.task9.model.LogEntity;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.HColumnDescriptor;
-import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.*;
-
+import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.JavaRDD;
 import scala.Tuple2;
+
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
@@ -85,7 +79,7 @@ public class SparkStreamingApp {
                 //conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"));
                 conf.set("hbase.zookeeper.property.clientPort", "2181");
                 conf.set("hbase.zookeeper.quorum", "sandbox.hortonworks.com");
-                conf.set("zookeeper.znode.parent", "/hbase");
+                conf.set("zookeeper.znode.parent", "/hbase-unsecure");
 
 
                 Put put = new Put(Bytes.toBytes(new java.util.Date().getTime()));
