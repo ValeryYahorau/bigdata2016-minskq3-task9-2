@@ -60,12 +60,7 @@ public class SparkStreamingApp {
         JavaPairReceiverInputDStream<String, String> messages =
                 KafkaUtils.createStream(jssc, zkQuorum, group, topicMap);
 
-        Configuration conf = HBaseConfiguration.create();
-        conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"));
-        conf.set("hbase.zookeeper.property.clientPort", "2181");
-        conf.set("hbase.zookeeper.quorum", "sandbox.hortonworks.com");
-        conf.set("zookeeper.znode.parent", "/hbase-unsecure");
-        HTable table = new HTable(conf, "loglines");
+
 
         JavaDStream<LogEntity> lines = messages.map(new Function<Tuple2<String, String>, LogEntity>() {
             @Override
@@ -74,7 +69,20 @@ public class SparkStreamingApp {
                 Put put = new Put(Bytes.toBytes(new java.util.Date().getTime()));
                 put.add(Bytes.toBytes("details"), Bytes.toBytes("logline"), Bytes.toBytes(tuple2._2()));
                 try {
+
+                    Configuration conf = HBaseConfiguration.create();
+                    conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"));
+                    conf.set("hbase.zookeeper.property.clientPort", "2181");
+                    conf.set("hbase.zookeeper.quorum", "sandbox.hortonworks.com");
+                    conf.set("zookeeper.znode.parent", "/hbase-unsecure");
+                    HTable table = new HTable(conf, "loglines");
+
+
                     table.put(put);
+
+                    table.close();
+
+
                 } catch (IOException e) {
                     System.out.println("### IOException" + e.getMessage());
                 }
