@@ -11,6 +11,9 @@ import com.epam.bigdata2016.minskq3.task9.model.LogEntity;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.HColumnDescriptor;
+import org.apache.hadoop.hbase.HTableDescriptor;
+import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
 
 import org.apache.hadoop.hbase.util.Bytes;
@@ -61,6 +64,18 @@ public class SparkStreamingApp {
                 KafkaUtils.createStream(jssc, zkQuorum, group, topicMap);
 
 
+        Configuration conf = HBaseConfiguration.create();
+        conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"));
+        conf.set("hbase.zookeeper.property.clientPort", "2181");
+        conf.set("hbase.zookeeper.quorum", "sandbox.hortonworks.com");
+        conf.set("zookeeper.znode.parent", "/hbase");
+
+        HTableDescriptor crTable = new HTableDescriptor(Bytes.toBytes("loglines"));
+        HColumnDescriptor family = new HColumnDescriptor(Bytes.toBytes("logline"));
+        crTable.addFamily(family);
+
+        HBaseAdmin admin = new HBaseAdmin(conf);
+        admin.createTable(crTable);
 
         JavaDStream<LogEntity> lines = messages.map(new Function<Tuple2<String, String>, LogEntity>() {
             @Override
@@ -71,11 +86,6 @@ public class SparkStreamingApp {
                 put.add(Bytes.toBytes("details"), Bytes.toBytes("logline"), Bytes.toBytes(tuple2._2()));
                 try {
                     System.out.println("%2");
-                    Configuration conf = HBaseConfiguration.create();
-                    conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"));
-                    conf.set("hbase.zookeeper.property.clientPort", "2181");
-                    conf.set("hbase.zookeeper.quorum", "sandbox.hortonworks.com");
-                    conf.set("zookeeper.znode.parent", "/hbase");
                     HTable table = new HTable(conf, "loglines");
 
                     table.put(put);
