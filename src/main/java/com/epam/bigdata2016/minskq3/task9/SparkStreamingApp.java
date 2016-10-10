@@ -42,8 +42,8 @@ public class SparkStreamingApp {
         String group = args[2];
         String[] topics = args[3].split(",");
         int numThreads = Integer.parseInt(args[4]);
-        final String tableName = args[5];
-        final String columnFamily = args[6];
+        String tableName = args[5];
+        String columnFamily = args[6];
 
         SparkConf sparkConf = new SparkConf().setAppName("SparkStreamingLogAggregationApp");
         JavaStreamingContext jssc = new JavaStreamingContext(sparkConf, new Duration(2000));
@@ -83,10 +83,10 @@ public class SparkStreamingApp {
 
 
                 Put put = new Put(Bytes.toBytes(new java.util.Date().getTime()));
-                put.add(Bytes.toBytes(columnFamily), Bytes.toBytes("input"), Bytes.toBytes(tuple2._2()));
+                put.add(Bytes.toBytes("log_line"), Bytes.toBytes("input"), Bytes.toBytes(tuple2._2()));
                 try {
                     System.out.println("%2");
-                    HTable table = new HTable(conf, tableName);
+                    HTable table = new HTable(conf, "log_lines3");
 
                     table.put(put);
 
