@@ -66,10 +66,11 @@ public class SparkStreamingApp {
             @Override
             public LogEntity call(Tuple2<String, String> tuple2) {
 
+                System.out.println("%1");
                 Put put = new Put(Bytes.toBytes(new java.util.Date().getTime()));
                 put.add(Bytes.toBytes("details"), Bytes.toBytes("logline"), Bytes.toBytes(tuple2._2()));
                 try {
-
+                    System.out.println("%2");
                     Configuration conf = HBaseConfiguration.create();
                     conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"));
                     conf.set("hbase.zookeeper.property.clientPort", "2181");
@@ -81,9 +82,9 @@ public class SparkStreamingApp {
                     table.put(put);
 
                     table.close();
+                    System.out.println("%3");
 
-
-                } catch (IOException e) {
+                } catch (Exception e) {
                     System.out.println("### IOException" + e.getMessage());
                 }
                 System.out.println("###1 " + tuple2.toString());
