@@ -60,7 +60,9 @@ public class SparkStreamingApp {
                 KafkaUtils.createStream(jssc, zkQuorum, group, topicMap);
 
         Configuration conf = HBaseConfiguration.create();
-        conf.set("hbase.zookeeper.quorum", zkQuorum);
+        conf.set("hbase.zookeeper.property.clientPort", "2181");
+        conf.set("hbase.zookeeper.quorum", "sandbox.hortonworks.com");
+        conf.set("zookeeper.znode.parent", "/hbase");
         HTable table = new HTable(conf, "loglines");
 
         JavaDStream<LogEntity> lines = messages.map(new Function<Tuple2<String, String>, LogEntity>() {
@@ -165,6 +167,7 @@ public class SparkStreamingApp {
                 return i1 + i2;
             }
         });
+
 
         wordCounts.print();
         jssc.start();
