@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 
 import com.epam.bigdata2016.minskq3.task9.model.LogEntity;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.*;
 
@@ -60,6 +61,7 @@ public class SparkStreamingApp {
                 KafkaUtils.createStream(jssc, zkQuorum, group, topicMap);
 
         Configuration conf = HBaseConfiguration.create();
+        conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"));
         conf.set("hbase.zookeeper.property.clientPort", "2181");
         conf.set("hbase.zookeeper.quorum", "sandbox.hortonworks.com");
         conf.set("zookeeper.znode.parent", "/hbase");
