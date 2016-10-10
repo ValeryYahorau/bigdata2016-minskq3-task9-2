@@ -1,13 +1,21 @@
 package com.epam.bigdata2016.minskq3.task9;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.regex.Pattern;
 
-import scala.Tuple2;
+import com.epam.bigdata2016.minskq3.task9.model.LogEntity;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.client.*;
 
+import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
+import scala.Tuple2;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
@@ -40,8 +48,8 @@ public class SparkStreamingApp {
         String columnFamily = args[6];
 
         SparkConf sparkConf = new SparkConf().setAppName("SparkStreamingLogAggregationApp");
-
         JavaStreamingContext jssc = new JavaStreamingContext(sparkConf, new Duration(2000));
+
 
         Map<String, Integer> topicMap = new HashMap<>();
         for (String topic : topics) {
@@ -51,19 +59,97 @@ public class SparkStreamingApp {
         JavaPairReceiverInputDStream<String, String> messages =
                 KafkaUtils.createStream(jssc, zkQuorum, group, topicMap);
 
-        JavaDStream<String> lines = messages.map(new Function<Tuple2<String, String>, String>() {
-            @Override
-            public String call(Tuple2<String, String> tuple2) {
+        Configuration conf = HBaseConfiguration.create();
+        conf.set("hbase.zookeeper.quorum", zkQuorum);
+        HTable table = new HTable(conf, "loglines");
 
+        JavaDStream<LogEntity> lines = messages.map(new Function<Tuple2<String, String>, LogEntity>() {
+            @Override
+            public LogEntity call(Tuple2<String, String> tuple2) {
+
+                Put put = new Put(Bytes.toBytes(new java.util.Date().getTime()));
+                put.add(Bytes.toBytes("details"), Bytes.toBytes("logline"), Bytes.toBytes(tuple2._2()));
+                try {
+                    table.put(put);
+                } catch (IOException e) {
+                    System.out.println("### IOException" + e.getMessage());
+                }
                 System.out.println("###1 " + tuple2.toString());
-                return tuple2._2();
+                return new LogEntity(tuple2._2());
             }
         });
+//
+//        Configuration conf = HBaseConfiguration.create();
+//        conf.set("hbase.zookeeper.quorum", zkQuorum);
+//
+//
+//        HTable table = new HTable(conf, "logstable");
+//
+//        Put put = new Put(Bytes.toBytes(new java.util.Date().getTime()));
+//        put.add(Bytes.toBytes("details"), Bytes.toBytes("UniqueId"), Bytes.toBytes(dataBean.getUid()));
+//
+//
+//        lines.foreachRDD(new Function<JavaRDD<LogEntity>, Void>() {
+//            @Override
+//            public Void call(JavaRDD<LogEntity> rdd) throws Exception {
+//                if (rdd != null) {
+//
+//
+//                }
+//            }
+//        });
 
-        JavaDStream<String> words = lines.flatMap(new FlatMapFunction<String, String>() {
+//
+//        lines.f
+//        lines.foreachRDD(new Function2<JavaPairRDD<String, Integer>, Void>() {
+//                             @Override
+//                             public Void call(JavaPairRDD<String, Integer> rdd, Time time) throws IOException {
+//                                 // Get or register the blacklist Broadcast
+//                                 final Broadcast<List<String>> blacklist = JavaWordBlacklist.getInstance(new JavaSparkContext(rdd.context()));
+//                                 // Get or register the droppedWordsCounter Accumulator
+//                                 final LongAccumulator droppedWordsCounter = JavaDroppedWordsCounter.getInstance(new JavaSparkContext(rdd.context()));
+//                                 // Use blacklist to drop words and use droppedWordsCounter to count them
+//                                 String counts = rdd.filter(new Function<Tuple2<String, Integer>, Boolean>() {
+//                                     @Override
+//                                     public Boolean call(Tuple2<String, Integer> wordCount) throws Exception {
+//                                         if (blacklist.value().contains(wordCount._1())) {
+//                                             droppedWordsCounter.add(wordCount._2());
+//                                             return false;
+//                                         } else {
+//                                             return true;
+//                                         }
+//                                     }
+//                                 }).collect().toString();
+//                                 String output = "Counts at time " + time + " " + counts;
+//                             }
+//                         }
+//
+//                lines.foreachRDD(VoidFunction < >);
+
+//        lines.foreachRDD(new Function<JavaRDD<LogEntity>, Void>() {
+//            public Void call(JavaRDD<LogEntity> personRDD) throws Exception {
+//                //pushRawDataToHBase(hBaseContext, personRDD);
+//                return null;
+//            }
+//        });
+
+
+//        Configuration conf = HBaseConfiguration.create();
+//        conf.set("hbase.zookeeper.quorum", zkQuorum);
+//
+//
+//        HTable table = new HTable(conf, "testtable");
+//        Put put = new Put(Bytes.toBytes("row1"));
+//        put.add(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"),
+//                Bytes.toBytes("val1"));
+//        put.add(Bytes.toBytes("colfam1"), Bytes.toBytes("qual2"),
+//                Bytes.toBytes("val2"));
+//        table.put(put);
+
+        JavaDStream<String> words = lines.flatMap(new FlatMapFunction<LogEntity, String>() {
             @Override
-            public Iterator<String> call(String x) {
-                return Arrays.asList(SPACE.split(x)).iterator();
+            public Iterator<String> call(LogEntity x) {
+                return Arrays.asList(SPACE.split(x.getLine())).iterator();
             }
         });
 
