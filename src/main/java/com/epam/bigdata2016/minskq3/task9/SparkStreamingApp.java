@@ -89,10 +89,10 @@ public class SparkStreamingApp {
 
 
                 Put put = new Put(Bytes.toBytes(new java.util.Date().getTime()));
-                put.add(Bytes.toBytes("details"), Bytes.toBytes("logline"), Bytes.toBytes(tuple2._2()));
+                put.add(Bytes.toBytes("log_line"), Bytes.toBytes("input"), Bytes.toBytes(tuple2._2()));
                 try {
                     System.out.println("%2");
-                    HTable table = new HTable(conf, "loglines");
+                    HTable table = new HTable(conf, "log_lines");
 
                     table.put(put);
 
