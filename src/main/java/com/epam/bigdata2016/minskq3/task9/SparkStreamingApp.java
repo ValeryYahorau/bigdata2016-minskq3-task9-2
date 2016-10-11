@@ -1,5 +1,6 @@
 package com.epam.bigdata2016.minskq3.task9;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
@@ -57,17 +58,7 @@ public class SparkStreamingApp {
         JavaPairReceiverInputDStream<String, String> messages =
                 KafkaUtils.createStream(jssc, zkQuorum, group, topicMap);
 
-        System.out.println("$1");
-
-
-
-
-//        HTableDescriptor crTable = new HTableDescriptor(Bytes.toBytes("loglines"));
- //       HColumnDescriptor family = new HColumnDescriptor(Bytes.toBytes("logline"));
- //       crTable.addFamily(family);
-
-//        HBaseAdmin admin = new HBaseAdmin(conf);
-//        admin.createTable(crTable);
+        System.out.println("%0");
 
         JavaDStream<LogEntity> lines = messages.map(new Function<Tuple2<String, String>, LogEntity>() {
             @Override
@@ -75,98 +66,23 @@ public class SparkStreamingApp {
 
                 System.out.println("%1");
 
-                Configuration conf = HBaseConfiguration.create();
-                //conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"));
-                conf.set("hbase.zookeeper.property.clientPort", "2181");
-                conf.set("hbase.zookeeper.quorum", "sandbox.hortonworks.com");
-                conf.set("zookeeper.znode.parent", "/hbase-unsecure");
-
-
                 Put put = new Put(Bytes.toBytes(new java.util.Date().getTime()));
                 put.add(Bytes.toBytes("log_line"), Bytes.toBytes("input"), Bytes.toBytes(tuple2._2()));
                 try {
                     System.out.println("%2");
-                    HTable table = new HTable(conf, "log_lines3");
-
+                    HTable table = getTable("log_lines");
                     table.put(put);
-
                     table.close();
                     System.out.println("%3");
 
                 } catch (Exception e) {
-                    System.out.println("### IOException" + e.getMessage());
+                    System.out.println("%%% Exception" + e.getMessage());
                 }
-                System.out.println("###1 " + tuple2.toString());
+                System.out.println("%4 " + tuple2.toString());
                 return new LogEntity(tuple2._2());
             }
         });
-//
-//        Configuration conf = HBaseConfiguration.create();
-//        conf.set("hbase.zookeeper.quorum", zkQuorum);
-//
-//
-//        HTable table = new HTable(conf, "logstable");
-//
-//        Put put = new Put(Bytes.toBytes(new java.util.Date().getTime()));
-//        put.add(Bytes.toBytes("details"), Bytes.toBytes("UniqueId"), Bytes.toBytes(dataBean.getUid()));
-//
-//
-//        lines.foreachRDD(new Function<JavaRDD<LogEntity>, Void>() {
-//            @Override
-//            public Void call(JavaRDD<LogEntity> rdd) throws Exception {
-//                if (rdd != null) {
-//
-//
-//                }
-//            }
-//        });
 
-//
-//        lines.f
-//        lines.foreachRDD(new Function2<JavaPairRDD<String, Integer>, Void>() {
-//                             @Override
-//                             public Void call(JavaPairRDD<String, Integer> rdd, Time time) throws IOException {
-//                                 // Get or register the blacklist Broadcast
-//                                 final Broadcast<List<String>> blacklist = JavaWordBlacklist.getInstance(new JavaSparkContext(rdd.context()));
-//                                 // Get or register the droppedWordsCounter Accumulator
-//                                 final LongAccumulator droppedWordsCounter = JavaDroppedWordsCounter.getInstance(new JavaSparkContext(rdd.context()));
-//                                 // Use blacklist to drop words and use droppedWordsCounter to count them
-//                                 String counts = rdd.filter(new Function<Tuple2<String, Integer>, Boolean>() {
-//                                     @Override
-//                                     public Boolean call(Tuple2<String, Integer> wordCount) throws Exception {
-//                                         if (blacklist.value().contains(wordCount._1())) {
-//                                             droppedWordsCounter.add(wordCount._2());
-//                                             return false;
-//                                         } else {
-//                                             return true;
-//                                         }
-//                                     }
-//                                 }).collect().toString();
-//                                 String output = "Counts at time " + time + " " + counts;
-//                             }
-//                         }
-//
-//                lines.foreachRDD(VoidFunction < >);
-
-//        lines.foreachRDD(new Function<JavaRDD<LogEntity>, Void>() {
-//            public Void call(JavaRDD<LogEntity> personRDD) throws Exception {
-//                //pushRawDataToHBase(hBaseContext, personRDD);
-//                return null;
-//            }
-//        });
-
-
-//        Configuration conf = HBaseConfiguration.create();
-//        conf.set("hbase.zookeeper.quorum", zkQuorum);
-//
-//
-//        HTable table = new HTable(conf, "testtable");
-//        Put put = new Put(Bytes.toBytes("row1"));
-//        put.add(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"),
-//                Bytes.toBytes("val1"));
-//        put.add(Bytes.toBytes("colfam1"), Bytes.toBytes("qual2"),
-//                Bytes.toBytes("val2"));
-//        table.put(put);
 
         JavaDStream<String> words = lines.flatMap(new FlatMapFunction<LogEntity, String>() {
             @Override
@@ -188,9 +104,19 @@ public class SparkStreamingApp {
             }
         });
 
-
         wordCounts.print();
         jssc.start();
         jssc.awaitTermination();
+    }
+
+    private static HTable getTable(String name) throws IOException {
+        Configuration conf = HBaseConfiguration.create();
+        //conf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"));
+        conf.set("hbase.zookeeper.property.clientPort", "2181");
+        conf.set("hbase.zookeeper.quorum", "sandbox.hortonworks.com");
+        conf.set("zookeeper.znode.parent", "/hbase-unsecure");
+
+        HTable table = new HTable(conf, "name");
+        return table;
     }
 }
