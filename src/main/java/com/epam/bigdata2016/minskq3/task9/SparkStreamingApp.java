@@ -67,10 +67,10 @@ public class SparkStreamingApp {
                 System.out.println("%1");
 
                 Put put = new Put(Bytes.toBytes(new java.util.Date().getTime()));
-                put.add(Bytes.toBytes("log_line"), Bytes.toBytes("input"), Bytes.toBytes(tuple2._2()));
+                put.add(Bytes.toBytes("log"), Bytes.toBytes("input"), Bytes.toBytes(tuple2._2()));
                 try {
                     System.out.println("%2");
-                    HTable table = getTable("log_lines");
+                    HTable table = getTable("logs");
                     table.put(put);
                     table.close();
                     System.out.println("%3");
