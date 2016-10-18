@@ -23,7 +23,6 @@ public class SparkStreamingApp {
     private static SimpleDateFormat tmsFormatter = new SimpleDateFormat("yyyyMMddhhmmss");
     private static SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-    private static final Pattern SPACE = Pattern.compile(" ");
     private static final String SPLIT = "\\t";
     private static final String NULL = "null";
     private static final String BID_ID = "bid_Id";
