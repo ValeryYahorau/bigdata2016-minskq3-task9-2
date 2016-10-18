@@ -79,9 +79,7 @@ public class SparkStreamingApp {
             Configuration conf = getConfig();
             HTable table = new HTable(conf, tableName);
 
-            // Split each line into fields
             String[] fields = tuple2._2().toString().split(SPLIT);
-
             UserAgent ua = UserAgent.parseUserAgentString(fields[3]);
             String device =  ua.getBrowser() != null ? ua.getOperatingSystem().getDeviceType().getName() : null;
             String os = ua.getBrowser() != null ? ua.getOperatingSystem().getName() : null;
