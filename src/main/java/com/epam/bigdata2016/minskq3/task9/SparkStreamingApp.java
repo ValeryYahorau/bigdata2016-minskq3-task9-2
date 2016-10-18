@@ -1,32 +1,23 @@
 package com.epam.bigdata2016.minskq3.task9;
 
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Pattern;
-
-import org.apache.spark.streaming.*;
-
+import eu.bitwalker.useragentutils.UserAgent;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.spark.SparkConf;
+import org.apache.spark.streaming.Duration;
 import org.apache.spark.streaming.api.java.JavaDStream;
-import org.apache.spark.streaming.api.java.JavaPairDStream;
 import org.apache.spark.streaming.api.java.JavaPairReceiverInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import org.apache.spark.streaming.kafka.KafkaUtils;
 
-import eu.bitwalker.useragentutils.UserAgent;
-
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.HBaseConfiguration;
-
-import org.apache.hadoop.hbase.client.HTable;
-import org.apache.hadoop.hbase.client.Put;
-
-import org.apache.hadoop.hbase.util.Bytes;
-
-import scala.Tuple2;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 public class SparkStreamingApp {
     private static SimpleDateFormat tmsFormatter = new SimpleDateFormat("yyyyMMddhhmmss");
@@ -76,6 +67,7 @@ public class SparkStreamingApp {
 
         SparkConf sparkConf = new SparkConf().setAppName("SparkStreamingLogAggregationApp").set("spark.serializer", "org.apache.spark.serializer.KryoSerializer");
         JavaStreamingContext jssc = new JavaStreamingContext(sparkConf, new Duration(2000));
+        jssc.checkpoint("hdfs://sandbox.hortonworks.com/tmp/aux2/checkpoint");
 
         Map<String, Integer> topicMap = new HashMap<>();
         for (String topic : topics) {
@@ -137,6 +129,7 @@ public class SparkStreamingApp {
             return new String(tuple2._2());
         });
 
+        messages.checkpoint(new Duration(10000));
         lines.print();
 
         jssc.start();
